@@ -1,0 +1,62 @@
+@startuml
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!includeurl C4P/C4_Container.puml
+
+Person(BU, "Бизнес-пользователь", "Аналитик или менеджер, который строит ad-hoc-отчёты")
+Person(OP, "Оператор клиники", "Работает с интерфейсом для ежедневных операций")
+
+System_Boundary(Platform, "Платформа данных «Будущее 2.0»") {
+ 
+ Container(Portal, "Портал самообслуживания", "React / Vue", "Формирование отчётов и дашбордов без участия ИТ")
+ Container(LegacyConsole, "Консоль оператора (legacy)", "PowerBuilder", "Повседневные операции в клиниках")
+ Container(PowerBI, "Power BI", "SaaS", "Готовые операционные дашборды")
+
+ Container(API, "API-шлюз", "GraphQL / REST", "Обеспечивает доступ фронтендов к данным и сервисам")
+ Container(SemanticLayer, "Семантический слой", "Dremio / AtScale", "Единая логическая модель данных для BI и портала")
+
+ Container(DataLake, "Озеро-хранилище (Lakehouse)", "Delta Lake", "Сырые, очищенные и витринные данные")
+ Container(DomainFin, "Финтех-витрина", "SQL on Lakehouse", "Представления для финансовой аналитики")
+ Container(DomainMed, "Медицинская витрина", "SQL on Lakehouse", "Представления для медицинской аналитики")
+ Container(DomainPharma, "Фарма-витрина", "SQL on Lakehouse", "Представления для фармацевтики")
+ Container(DomainElect, "Витрина электроники", "SQL on Lakehouse", "Данные о медицинском оборудовании")
+
+ Container(EventBus, "Шина событий", "Kafka / Pulsar", "Real-time, доменные события и CDC-потоки")
+ Container(LegacyDWH, "Монолитный DWH (legacy)", "SQL Server 2008", "Историческое хранилище с бизнес-логикой")
+ Container(CamelBus, "Интеграционная шина (legacy)", "Apache Camel", "Старый слой интеграций, выводится из эксплуатации")
+
+ Container(FinTechSvc, "Финтех-микросервисы", "Go / Java", "Банковские и платёжные операции")
+ Container(AISvc, "AI/ML-сервисы", "Python", "Анализ медицинских данных и прогнозы")
+ Container(PharmaSvc, "Фарма-сервисы", "Go / Java", "Интеграция с фармацевтическими партнёрами")
+ Container(ElectSvc, "Сервисы электроники", "Go / Java", "Интеграция с производителями оборудования")
+}
+
+Rel(BU, Portal, "Формирует отчёты и дашборды")
+Rel(BU, PowerBI, "Просматривает готовые дашборды")
+Rel(OP, LegacyConsole, "Операционные действия")
+
+Rel(Portal, API, "REST / GraphQL")
+Rel(LegacyConsole, API, "REST / GraphQL")
+Rel(PowerBI, SemanticLayer, "SQL / DAX")
+
+Rel(API, SemanticLayer, "Запросы")
+Rel(SemanticLayer, DataLake, "Чтение")
+
+Rel(FinTechSvc, EventBus, "Публикует события")
+Rel(AISvc, EventBus, "Публикует данные")
+Rel(PharmaSvc, EventBus, "Публикует события")
+Rel(ElectSvc, EventBus, "Публикует события")
+
+Rel(EventBus, DataLake, "Записывает (stream / CDC)")
+Rel(LegacyDWH, DataLake, "Batch-репликация")
+Rel(CamelBus, EventBus, "Постепенный перенос интеграций")
+
+Rel(DataLake, DomainFin, "Предоставляет данные")
+Rel(DataLake, DomainMed, "Предоставляет данные")
+Rel(DataLake, DomainPharma, "Предоставляет данные")
+Rel(DataLake, DomainElect, "Предоставляет данные")
+
+Rel(DomainFin, FinTechSvc, "Предоставляет аналитические данные")
+Rel(DomainMed, AISvc, "Обогащённые датасеты")
+Rel(DomainPharma, PharmaSvc, "Аналитика продаж и запасов")
+Rel(DomainElect, ElectSvc, "Данные об использовании оборудования")
+@enduml
