@@ -1,0 +1,45 @@
+@startuml
+title DFD “Будущее 2.0” — Доменные потоки данных
+' задать вертикальную компоновку
+top to bottom direction
+
+actor BusinessUser as BU
+
+' Домены
+rectangle "Домен: Финтех\n(микросервисы + витрина)" as FinTech
+rectangle "Домен: Медицина\n(микросервисы + витрина)" as Healthcare
+rectangle "Домен: Фармацевтика\n(микросервисы + витрина)" as Pharma
+rectangle "Домен: Электроника\n(микросервисы + витрина)" as Electronics
+
+' Инфраструктура
+cloud "Шина событий\n(EventBus: Kafka/Pulsar)" as EventBus
+database "Lakehouse\n(Delta Lake)" as DataLake
+folder "Семантический слой\n(Dremio/AtScale)" as SemanticLayer
+rectangle "Портал самообслуживания\n(React/Vue)" as Portal
+
+' Легаси (постепенный вывод)
+database "Legacy DWH\n(SQL Server 2008)" as LegacyDWH
+rectangle "Интеграционная шина\n(Apache Camel)" as CamelBus
+
+' Потоки пользователей
+BU --> Portal : Запрос отчётов
+
+' Доменные сервисы → EventBus
+FinTech    --> EventBus : Транзакции
+Healthcare --> EventBus : Мед. события
+Pharma     --> EventBus : Данные по поставкам
+Electronics--> EventBus : Телеметрия
+
+' EventBus → Lakehouse
+EventBus --> DataLake : Ингест стриминга
+
+' Legacy → Lakehouse (batch CDC)
+LegacyDWH  --> DataLake : Batch-репликация
+CamelBus  -[#gray,dashed]-> EventBus : Миграция интеграций
+
+' Lakehouse → Семантика
+DataLake --> SemanticLayer : Витрины по доменам
+
+' Семантика → Портал
+SemanticLayer --> Portal : Данные для BI и ad-hoc
+@enduml

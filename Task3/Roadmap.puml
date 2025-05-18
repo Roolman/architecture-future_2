@@ -1,0 +1,39 @@
+@startgantt
+Project starts 2025-06-01
+title Технологический роадмап «Будущее 2.0»
+
+[Phase 1: PoC Lakehouse & EventBus] as [P1] lasts 60 days
+note bottom
+  • Результат: Базовый Lakehouse + Kafka на Dev  
+  • Команда: Data Engineering  
+  • Ресурсы: Cloud-инфраструктура, тестовые данные
+end note
+
+[Phase 2: CDC ETL & Domain Marts] as [P2] starts at [P1]'s end and lasts 90 days
+note bottom
+  • Результат: CDC-пайплайны, первые доменные витрины  
+  • Команда: Data Engineering + Domain Teams  
+  • Ресурсы: DBT/Spark, мониторинг пайплайнов
+end note
+
+[Phase 3: Self-Service Portal & Semantic Layer] as [P3] starts at [P2]'s end and lasts 90 days
+note bottom
+  • Результат: Портал на React/Vue, настроен Dremio/AtScale  
+  • Команда: BI + Frontend + Data Engineering  
+  • Ресурсы: UI-разработчики, лицензии семантического слоя
+end note
+
+[Phase 4: Sunset Legacy & Camel] as [P4] starts at [P3]'s end and lasts 60 days
+note bottom
+  • Результат: Отключен SQL 2008, выведен Camel, все интеграции на EventBus  
+  • Команда: Infra + Data Engineering  
+  • Ресурсы: Скрипты миграции, план отката
+end note
+
+[Phase 5: Real-time Analytics & Governance] as [P5] starts at [P4]'s end and lasts 90 days
+note bottom
+  • Результат: Near-real-time отчёты, внедрены RBAC, аудит, шифрование  
+  • Команда: Security + Data Engineering + Domain Teams  
+  • Ресурсы: Инструменты аудита, ключи шифрования
+end note
+@endgantt
